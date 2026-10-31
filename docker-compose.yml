@@ -1,0 +1,76 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        REACT_APP_SUPABASE_URL: ${SUPABASE_URL}
+        REACT_APP_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+        REACT_APP_API_BASE_URL: ""
+    ports:
+      - "3000:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - audique-net
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend-spring
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    environment:
+      - DB_URL=${DB_URL:-jdbc:postgresql://postgres:5432/audique}
+      - DB_USERNAME=${DB_USERNAME:-audique}
+      - DB_PASSWORD=${DB_PASSWORD:-audique}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - GROQ_WHISPER_MODEL=${GROQ_WHISPER_MODEL:-whisper-large-v3-turbo}
+      - GROQ_LLM_MODEL=${GROQ_LLM_MODEL:-openai/gpt-oss-120b}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - SUPABASE_JWT_SECRET=${SUPABASE_JWT_SECRET}
+      - SUPABASE_JWKS_URL=${SUPABASE_JWKS_URL}
+      - SUPABASE_DISCOVERY_URL=${SUPABASE_DISCOVERY_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - SUPABASE_STORAGE_BUCKET=${SUPABASE_STORAGE_BUCKET:-audio-files}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - audique-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 40s
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: audique
+      POSTGRES_USER: ${DB_USERNAME:-audique}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-audique}
+    ports:
+      - "5432:5432"
+    volumes:
+      - audique_pgdata:/var/lib/postgresql/data
+    networks:
+      - audique-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-audique} -d audique"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  audique_pgdata:
+    name: audique_pgdata
+
+networks:
+  audique-net:
+    driver: bridge

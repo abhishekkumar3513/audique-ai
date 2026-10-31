@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:audiquetest;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+  flyway:
+    enabled: false
+
+groq:
+  api-key: test-api-key
+  base-url: http://localhost:8089
+  whisper-model: whisper-large-v3-turbo
+  llm-model: llama-3.1-8b-instant
+
+supabase:
+  url: http://localhost:54321
+  anon-key: test-anon-key
+  jwt-secret: test-jwt-secret-at-least-256-bits-long-for-hmac-sha256-signing!
+

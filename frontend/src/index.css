@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+}
+
+/* Ensure all Lucide icons and SVGs retain explicit sizing and display */
+svg.lucide, svg[class*="w-"], svg[class*="h-"], button svg {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
